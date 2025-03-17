@@ -3,7 +3,7 @@ const { Storage } = require("megajs")
 
 const express = require("express");
 const path = require("path");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');
 const hbs = require("hbs");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
