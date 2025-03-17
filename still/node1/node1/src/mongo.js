@@ -264,14 +264,56 @@ const studentSchema = new mongoose.Schema({
         status: { type: String, enum: ["Pending", "Admitted", "Rejected"], required: true },
      // Add remarks field
       },
-    missingFields: [String]
-}, 
+    missingFields: [String],
+
+    feesDetails: [
+        {
+            feeType: String,
+            allocatedFees: Number,
+            date: Date,
+            upi: String,
+            paidUnpaid: String,
+            pending: String,
+            reducedFee: String,
+            concessionReason: String,
+        }
+    ]
+},
+
 
 {
     collection: "students", 
     timestamps: true
 });
 
-const Students = mongoose.model("Students", studentSchema, "students");
 
-module.exports = { LogInCollection, Students };
+
+
+
+const feesSchema = new mongoose.Schema({
+    tuition: [
+      {
+        branch: String,
+        fg: String,
+        nonFg: String,
+        gq: String,
+        mq: String,
+        reducedFee: { type: String, default: '' }, // Add reduced fee
+        concessionReason: { type: String, default: '' }, // Add concession reason
+      },
+    ],
+    hostel: [
+        {
+          branch: String,
+          bcMbc: String,
+          scSt: String,
+          reducedFee: { type: String, default: '' }, // Add reduced fee
+          concessionReason: { type: String, default: '' }, // Add concession reason
+        },
+      ],
+    });
+
+    
+const Fees = mongoose.model("Fees", feesSchema, "fees");
+const Students = mongoose.model("Students", studentSchema, "students");
+module.exports = { LogInCollection, Students,Fees };

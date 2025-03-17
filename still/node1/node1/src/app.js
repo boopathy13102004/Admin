@@ -1282,5 +1282,92 @@ app.get('/student/:id', async (req, res) => {
   });
 });
 
+// Get the latest fees structure for the admin page
+app.get('/api/admin/fees', async (req, res) => {
+  try {
+      const latestFees = await Fees.findOne().sort({ createdAt: -1 }).limit(1);
+      res.json(latestFees);
+  } catch (error) {
+      console.error('Error fetching fees for admin:', error);
+      res.status(500).json({ error: 'Failed to fetch fees.' });
+  }
+});
+
+// Save or update the fees structure from the admin page
+app.post('/api/admin/fees', async (req, res) => {
+  try {
+      const updatedFeesData = req.body;
+      if (!updatedFeesData || !updatedFeesData.tuition || !updatedFeesData.hostel) {
+          return res.status(400).json({ error: 'Invalid fees data.' });
+      }
+
+      // Find the latest existing fees document
+      const latestFees = await Fees.findOne().sort({ createdAt: -1 }).limit(1);
+
+      if (latestFees) {
+          // Update the latest document
+          latestFees.tuition = updatedFeesData.tuition;
+          latestFees.hostel = updatedFeesData.hostel;
+          const savedFees = await latestFees.save();
+          res.json(savedFees);
+      } else {
+          // If no existing fees document, create a new one
+          const newFees = new Fees(updatedFeesData);
+          const savedFees = await newFees.save();
+          res.json(savedFees);
+      }
+  } catch (error) {
+      console.error('Error saving/updating fees:', error);
+      res.status(500).json({ error: 'Failed to save/update fees.' });
+  }
+});
+
+// --- Student Fees Display ---
+
+app.get('/api/student/fees', async (req, res) => {
+  try {
+      const { branch, community, modeOfAdmission, firstGraduate, needHostel } = req.query;
+
+      if (!branch) {
+          return res.status(400).json({ error: 'Branch is required.' });
+      }
+
+      const latestFees = await Fees.findOne().sort({ createdAt: -1 }).limit(1);
+
+      if (!latestFees) {
+          return res.status(404).json({ error: 'Fees structure not found.' });
+      }
+
+      let tuitionFeeEntry = latestFees.tuition.find(fee => fee.branch === branch);
+      let tuitionFee = 0;
+      let hostelFee = 0;
+
+      if (tuitionFeeEntry) {
+          if (community === "SC" || community === "ST") {
+              tuitionFee = 0;
+          } else if (modeOfAdmission === "Management Quota") {
+              tuitionFee = tuitionFeeEntry.mq || 0;
+          } else if (modeOfAdmission === "Government Quota") {
+              tuitionFee = (firstGraduate === "Yes") ? (tuitionFeeEntry.fg || 0) : (tuitionFeeEntry.nonFg || 0);
+          } else {
+              tuitionFee = tuitionFeeEntry.nonFg || 0; // Default
+          }
+      }
+
+      if (needHostel === 'true' && latestFees.hostel) {
+          let hostelEntry = latestFees.hostel.find(h => h.branch.includes(branch));
+          if (hostelEntry) {
+              hostelFee = (community === "SC" || community === "ST") ? (hostelEntry.scSt || 0) : (hostelEntry.bcMbc || 0);
+          }
+      }
+
+      res.json({ tuition: tuitionFee, hostel: hostelFee });
+
+  } catch (error) {
+      console.error('Error fetching student fees:', error);
+      res.status(500).json({ error: 'Failed to fetch student fees.' });
+  }
+});
+
 
 app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
