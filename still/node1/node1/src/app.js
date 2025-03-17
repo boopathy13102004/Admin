@@ -12,7 +12,7 @@ const multer = require("multer");
 const fs = require("fs");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+const mega = require('megajs');
 // ✅ MongoDB Connection
 const mongoURI =
   "mongodb+srv://divansan05:Divansan0076@loginformpractice.vlg9n.mongodb.net/mydatabase?retryWrites=true&w=majority&appName=LoginFormPractice";
@@ -108,9 +108,9 @@ const connectToMega = async () => {
   console.log("🔄 Connecting to MEGA...");
 
   return new Promise((resolve, reject) => {
-    const storage = new Storage({
-      email: process.env.MEGA_EMAIL,
-      password: process.env.MEGA_PASSWORD,
+    const storage = new mega.Storage({
+      email: 'thamaraisiva29@gmail.com',
+      password: 'Thamaraisiva'
     });
 
     storage.on("ready", () => {
