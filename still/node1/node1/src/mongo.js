@@ -245,6 +245,8 @@ const studentSchema = new mongoose.Schema({
 
     mediumOfInstruction: { type: String, required: true, trim: true },
 
+    
+
     documents: {
         aadharCard: { type: String, default: null },
         communityCertificate: { type: String, default: null },
@@ -264,8 +266,9 @@ const studentSchema = new mongoose.Schema({
       },
     missingFields: [String]
 }, 
+
 {
-    collection: "students",
+    collection: "students", 
     timestamps: true
 });
 

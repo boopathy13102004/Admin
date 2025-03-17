@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 const { Storage } = require("megajs")
 
 const express = require("express");
@@ -6,13 +6,15 @@ const path = require("path");
 const bcrypt = require('bcryptjs');
 const hbs = require("hbs");
 const nodemailer = require("nodemailer");
-const session = require("express-session");
+const session = require('express-session');
 const mongoose = require("mongoose");
 const multer = require("multer");
 const fs = require("fs");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const mega = require('megajs');
+const MongoStore = require('connect-mongo');
+
 // ✅ MongoDB Connection
 const mongoURI =
   "mongodb+srv://divansan05:Divansan0076@loginformpractice.vlg9n.mongodb.net/mydatabase?retryWrites=true&w=majority&appName=LoginFormPractice";
@@ -47,13 +49,18 @@ app.get("/uploads/:filename", (req, res) => {
 });
 
 // 🛠️ Session Middleware
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "your_secret_key",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,  // Read MONGO_URI from .env
+    collectionName: 'sessions'
+  }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24  // 1 day
+  }
+}));
 
 // 📨 Flash Message Middleware
 app.use((req, res, next) => {
